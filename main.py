@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from ultralytics import YOLO
 
 app = FastAPI()
-model = YOLO("best.pt")                 # loaded once at startup
+model = YOLO(".\model\ppe-4_results (train-4)\weights\best.pt")                 # loaded once at startup
 print(model.names)                      # check your class spellings in the terminal
 
 MIN_CONF = {"person": 0.4, "helmet": 0.5, "vest": 0.5, "gloves": 0.5}
