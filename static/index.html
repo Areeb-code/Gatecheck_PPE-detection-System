@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gatecheck: protective gear check</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦺</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#E6E4DE;--panel:#F6F5F1;--ink:#1D242A;--mute:#5E6A72;--line:#C9C6BD;--ok:#1B7F46;--bad:#C62828;--tape:#F2C200;--btn:#1D242A;--btnink:#F6F5F1;
+--head:"Barlow Condensed","Arial Narrow",Impact,sans-serif;--body:"IBM Plex Sans",system-ui,Segoe UI,Arial,sans-serif}
+:root[data-theme=dark]{--bg:#161B1F;--panel:#20272C;--ink:#EEEDE8;--mute:#9AA6AD;--line:#333D44;--ok:#43C27A;--bad:#FF6B5E;--btn:#EEEDE8;--btnink:#161B1F}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--body)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 20px 40px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0}
+h1{font:700 34px/1 var(--head);margin:0;letter-spacing:.01em}
+header p{margin:2px 0 0;color:var(--mute);font-size:14px}
+.hr{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--mute)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--mute);margin-right:6px}.dot.on{background:var(--ok)}.dot.off{background:var(--bad)}
+button,.btn{font:500 14px var(--body);cursor:pointer;border:1.5px solid var(--ink);background:transparent;color:var(--ink);padding:8px 14px;border-radius:3px}
+button.pri{background:var(--btn);color:var(--btnink)}button:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:3px solid var(--tape);outline-offset:2px}
+.status{background:var(--panel);border:2px solid var(--ink);margin-bottom:20px;overflow:hidden}
+.tape{height:14px;background:repeating-linear-gradient(-45deg,var(--tape) 0 14px,#1D242A 14px 28px);background-size:40px 100%}
+.status .m{padding:12px 18px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.status strong{font:700 34px/1.1 var(--head)}.status span{color:var(--mute)}
+.status.ok{border-color:var(--ok)}.status.ok strong{color:var(--ok)}
+.status.bad{border-color:var(--bad)}.status.bad strong{color:var(--bad)}.status.bad .tape{animation:run .8s linear infinite}
+@keyframes run{to{background-position:40px 0}}
+@media(prefers-reduced-motion:reduce){.status.bad .tape{animation:none}}
+main{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);gap:20px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.seg{display:flex;gap:0;margin-bottom:12px}.seg button{border-radius:0;margin-right:-1.5px}
+.seg button[aria-selected=true]{background:var(--ink);color:var(--bg)}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.stage{position:relative;background:#0c0f11;width:100%;aspect-ratio:16/9;border:2px solid var(--ink)}
+.stage video,.stage img,.stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.empty{position:absolute;inset:0;display:grid;place-items:center;color:#9AA6AD;text-align:center;padding:20px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid var(--ink);border-bottom:1px solid var(--line);margin-bottom:16px}
+.stats div{padding:10px 12px;border-left:1px solid var(--line)}.stats div:first-child{border-left:0;padding-left:0}
+.stats b{display:block;font:700 38px/1 var(--head)}.stats small{color:var(--mute);font-size:13px}
+ul{list-style:none;margin:0;padding:0}
+#people li{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:9px 12px;margin-bottom:6px;background:var(--panel);border-left:6px solid var(--line)}
+#people li.ok{border-left-color:var(--ok)}#people li.bad{border-left-color:var(--bad)}#people li.none{color:var(--mute)}
+#people i{font-style:normal;margin-left:10px}.y{color:var(--ok)}.n{color:var(--bad);font-weight:500}.x{color:var(--mute)}
+.tabs{display:flex;gap:18px;border-bottom:1px solid var(--line);margin:18px 0 12px}
+.tabs button{border:0;border-bottom:3px solid transparent;border-radius:0;padding:6px 0;font:700 22px var(--head)}
+.tabs button[aria-selected=true]{border-bottom-color:var(--tape)}
+#log li{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);align-items:center}
+#log img{width:96px;height:auto;border:1px solid var(--line)}#log small{color:var(--mute);display:block}
+.row2{display:flex;gap:10px;margin-top:12px}.hint{color:var(--mute);font-size:13px}
+fieldset{border:1px solid var(--line);margin:0 0 14px;padding:10px 12px}legend{padding:0 6px;color:var(--mute);font-size:13px}
+label{display:block;margin:8px 0}input[type=range]{width:100%;accent-color:var(--ink)}
+fieldset label{display:inline-block;margin-right:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><h1>Gatecheck</h1><p>Protective gear check for the front gate</p></div>
+  <div class="hr"><span><i class="dot" id="dot"></i><span id="srv">Server not checked</span></span><button id="theme" aria-label="Switch light or dark theme">Theme</button></div>
+</header>
+
+<section class="status idle" id="status" aria-live="polite">
+  <div class="tape"></div>
+  <div class="m"><strong id="st">Not checking</strong><span id="sub">Pick a source and press Start.</span></div>
+</section>
+
+<main>
+  <section>
+    <div class="seg" role="tablist" id="seg">
+      <button role="tab" data-src="webcam" aria-selected="true">Webcam</button>
+      <button role="tab" data-src="image" aria-selected="false">Image</button>
+      <button role="tab" data-src="video" aria-selected="false">Video file</button>
+    </div>
+    <div class="bar">
+      <button class="pri" id="go">Start</button>
+      <button id="pick" hidden>Choose file</button>
+      <button id="snap" disabled>Save snapshot</button>
+      <input type="file" id="file" hidden>
+    </div>
+    <div class="stage" id="stage">
+      <video id="v" playsinline muted hidden></video>
+      <img id="im" alt="Image being checked" hidden>
+      <canvas id="ov"></canvas>
+      <div class="empty" id="empty">Nothing is running. Press Start to check the webcam.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="stats">
+      <div><b id="n-view">0</b><small>In view</small></div>
+      <div><b id="n-ok">–</b><small>Compliant</small></div>
+      <div><b id="n-viol">0</b><small>Violations</small></div>
+      <div><b id="n-ms">–</b><small>ms per check</small></div>
+    </div>
+    <ul id="people"><li class="none">Start a source to see people here.</li></ul>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-log" aria-selected="true">Violations</button>
+      <button role="tab" id="t-set" aria-selected="false">Settings</button>
+    </div>
+    <div id="p-log">
+      <ul id="log"></ul>
+      <div class="row2"><button id="csv">Export CSV</button><button id="clr">Clear log</button></div>
+    </div>
+    <div id="p-set" hidden>
+      <fieldset><legend>Gear that must be worn</legend>
+        <label><input type="checkbox" data-req="helmet"> Helmet</label>
+        <label><input type="checkbox" data-req="vest"> Vest</label>
+        <label><input type="checkbox" data-req="gloves"> Gloves</label>
+      </fieldset>
+      <label>Check every <output id="o-every"></output> ms<input type="range" id="every" min="150" max="1500" step="50"></label>
+      <label>Smoothing: <output id="o-smooth"></output> checks<input type="range" id="smooth" min="1" max="10"></label>
+      <label><input type="checkbox" id="sound"> Play a sound on a new violation</label>
+      <label><input type="checkbox" id="items"> Draw boxes around gear</label>
+      <p class="hint">A violation counts only when most of the last few checks agree. A higher number is steadier but reacts more slowly.</p>
+    </div>
+  </section>
+</main>
+</div>
+
+<script>
+const $ = id => document.getElementById(id), ITEMS = ["helmet", "vest", "gloves"];
+let cfg = { req: ["helmet", "vest"], every: 300, smooth: 5, sound: true, items: true };
+try { Object.assign(cfg, JSON.parse(localStorage.gatecheck || "{}")); } catch (e) {}
+const save = () => { try { localStorage.gatecheck = JSON.stringify(cfg); } catch (e) {} };
+
+// theme
+const root = document.documentElement;
+let theme; try { theme = localStorage.gctheme; } catch (e) {}
+root.dataset.theme = theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+$("theme").onclick = () => { root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark"; try { localStorage.gctheme = root.dataset.theme; } catch (e) {} };
+
+// settings
+document.querySelectorAll("[data-req]").forEach(c => { c.checked = cfg.req.includes(c.dataset.req);
+  c.onchange = () => { cfg.req = [...document.querySelectorAll("[data-req]")].filter(x => x.checked).map(x => x.dataset.req); hist = []; save(); }; });
+[["every", "o-every"], ["smooth", "o-smooth"]].forEach(([k, o]) => { const e = $(k); e.value = cfg[k]; $(o).textContent = cfg[k];
+  e.oninput = () => { cfg[k] = +e.value; $(o).textContent = e.value; save(); }; });
+[["sound", "sound"], ["items", "items"]].forEach(([k, id]) => { const e = $(id); e.checked = cfg[k]; e.onchange = () => { cfg[k] = e.checked; save(); }; });
+const tab = which => { const l = which === "log"; $("p-log").hidden = !l; $("p-set").hidden = l; $("t-log").setAttribute("aria-selected", l); $("t-set").setAttribute("aria-selected", !l); };
+$("t-log").onclick = () => tab("log"); $("t-set").onclick = () => tab("set");
+
+// state
+let src = "webcam", stream = null, running = false, media = null, fileURL = null;
+let hist = [], prevFlag = false, lastLog = 0, events = [], seen = 0, okSeen = 0;
+const v = $("v"), im = $("im"), ov = $("ov"), cap = document.createElement("canvas");
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const status = (cls, t, s) => { $("status").className = "status " + cls; $("st").textContent = t; $("sub").textContent = s; };
+const online = ok => { $("dot").className = "dot " + (ok ? "on" : "off"); $("srv").textContent = ok ? "Server connected" : "Can’t reach the server"; };
+const label = () => { $("go").textContent = running ? "Stop" : src === "image" ? "Check image" : "Start"; };
+
+document.querySelectorAll("#seg button").forEach(b => b.onclick = () => {
+  stop(); src = b.dataset.src; if (fileURL) URL.revokeObjectURL(fileURL); fileURL = null;
+  document.querySelectorAll("#seg button").forEach(x => x.setAttribute("aria-selected", x === b));
+  $("pick").hidden = src === "webcam"; $("file").accept = src === "image" ? "image/*" : "video/*";
+  $("empty").textContent = src === "webcam" ? "Nothing is running. Press Start to check the webcam." : "Choose a " + (src === "image" ? "photo" : "video") + " to check.";
+  label(); });
+$("pick").onclick = () => $("file").click();
+$("file").onchange = e => { const f = e.target.files[0]; if (!f) return; stop(); fileURL = URL.createObjectURL(f); start(); e.target.value = ""; };
+$("go").onclick = () => running ? stop() : start();
+
+async function start() {
+  try {
+    if (src === "webcam") {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280 } });
+      v.srcObject = stream; v.hidden = false; im.hidden = true; await v.play(); media = v;
+    } else if (!fileURL) { $("file").click(); return; }
+    else if (src === "video") { v.srcObject = null; v.src = fileURL; v.loop = true; v.hidden = false; im.hidden = true; await v.play(); media = v; }
+    else { im.src = fileURL; im.hidden = false; v.hidden = true; await im.decode(); media = im; }
+  } catch (e) { status("bad", "Can’t open the source", src === "webcam" ? "Allow camera access in the address bar, then press Start again." : "That file could not be opened. Try another one."); return; }
+  $("empty").hidden = true; $("snap").disabled = false; running = true; hist = []; prevFlag = false; label();
+  status("idle", "Checking…", "Waiting for the first result.");
+  loop();
+}
+function stop(keep) {
+  running = false; if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+  if (!keep) { v.pause(); v.hidden = true; im.hidden = true; ov.getContext("2d").clearRect(0, 0, ov.width, ov.height); $("empty").hidden = false; $("snap").disabled = true; media = null;
+    status("idle", "Not checking", "Pick a source and press Start."); $("n-view").textContent = 0; $("people").innerHTML = '<li class="none">Start a source to see people here.</li>'; }
+  label();
+}
+async function loop() {
+  while (running) {
+    const t0 = performance.now();
+    try { await scan(); online(true); } catch (e) { online(false); status("bad", "Server unreachable", "Start it with: uvicorn main:app --port 8000"); }
+    if (src === "image") { stop(true); break; }
+    await sleep(Math.max(0, cfg.every - (performance.now() - t0)));
+  }
+}
+async function scan() {
+  const w = media.videoWidth || media.naturalWidth, h = media.videoHeight || media.naturalHeight; if (!w) return;
+  $("stage").style.aspectRatio = w + "/" + h; cap.width = w; cap.height = h; cap.getContext("2d").drawImage(media, 0, 0);
+  const blob = await new Promise(r => cap.toBlob(r, "image/jpeg", .75));
+  const fd = new FormData(); fd.append("file", blob, "f.jpg");
+  const t = performance.now(), res = await fetch("/detect", { method: "POST", body: fd });
+  if (!res.ok) throw new Error("bad response");
+  const d = await res.json(); $("n-ms").textContent = Math.round(performance.now() - t); render(d, w, h);
+}
+function render(d, w, h) {
+  const ppl = d.people.map(p => ({ ...p, miss: cfg.req.filter(k => !p[k]) }));
+  ov.width = w; ov.height = h; const g = ov.getContext("2d"), lw = Math.max(2, w / 320), fs = Math.max(14, Math.round(w / 45));
+  g.font = `600 ${fs}px sans-serif`; g.textBaseline = "top";
+  const tag = (b, text, col, dark) => { const tw = g.measureText(text).width + 10; g.fillStyle = col; g.fillRect(b[0] - lw / 2, Math.max(b[1] - fs - 8, 0), tw, fs + 8); g.fillStyle = dark ? "#111" : "#fff"; g.fillText(text, b[0] + 4, Math.max(b[1] - fs - 4, 4)); };
+  if (cfg.items) d.items.forEach(i => { g.strokeStyle = "#F2C200"; g.lineWidth = lw; g.strokeRect(i.box[0], i.box[1], i.box[2] - i.box[0], i.box[3] - i.box[1]); });
+  ppl.forEach((p, n) => { const col = p.miss.length ? "#E53935" : "#2E9E5B"; g.strokeStyle = col; g.lineWidth = lw * 1.5; g.strokeRect(p.box[0], p.box[1], p.box[2] - p.box[0], p.box[3] - p.box[1]);
+    tag(p.box, `Person ${n + 1}` + (p.miss.length ? ": no " + p.miss.join(", ") : ""), col, false); });
+
+  const bad = ppl.some(p => p.miss.length);
+  hist.push(bad ? 1 : 0); hist = hist.slice(-cfg.smooth);
+  const flagged = hist.reduce((a, b) => a + b, 0) > hist.length / 2;
+  seen += ppl.length; okSeen += ppl.filter(p => !p.miss.length).length;
+  const missing = [...new Set(ppl.flatMap(p => p.miss))];
+
+  if (!ppl.length) status("idle", "Gate clear", "No one in view.");
+  else if (flagged) status("bad", "Missing gear", "Missing: " + (missing.join(", ") || "see below") + ".");
+  else status("ok", "All clear", ppl.length + (ppl.length === 1 ? " person" : " people") + " in view, all wearing the required gear.");
+
+  if (flagged && !prevFlag && Date.now() - lastLog > 8000) logEvent(missing);
+  prevFlag = flagged;
+
+  $("n-view").textContent = ppl.length; $("n-ok").textContent = seen ? Math.round(100 * okSeen / seen) + "%" : "–"; $("n-viol").textContent = events.length;
+  $("people").innerHTML = ppl.length ? ppl.map((p, n) => `<li class="${p.miss.length ? "bad" : "ok"}"><b>Person ${n + 1}</b><span>${ITEMS.map(k => { const r = cfg.req.includes(k); return `<i class="${p[k] ? "y" : r ? "n" : "x"}">${p[k] ? "✓" : r ? "✕" : "–"} ${k}</i>`; }).join("")}</span></li>`).join("") : '<li class="none">Nobody in view.</li>';
+}
+
+// violation log
+function logEvent(missing) {
+  lastLog = Date.now(); const c = document.createElement("canvas"); c.width = 200; c.height = Math.round(200 * cap.height / cap.width);
+  c.getContext("2d").drawImage(cap, 0, 0, c.width, c.height);
+  events.unshift({ t: new Date(), miss: missing, img: c.toDataURL("image/jpeg", .6) }); events = events.slice(0, 100); drawLog(); beep();
+}
+function drawLog() {
+  $("log").innerHTML = events.length ? events.map(e => `<li><img src="${e.img}" alt="Frame at the time of the violation"><div><b>Missing ${e.miss.join(", ")}</b><small>${e.t.toLocaleString()}</small></div></li>`).join("")
+    : '<li class="hint">No violations yet. They appear here with a snapshot.</li>';
+  $("n-viol").textContent = events.length;
+}
+$("clr").onclick = () => { events = []; drawLog(); };
+$("csv").onclick = () => { if (!events.length) return; const rows = ["time,missing", ...events.map(e => `"${e.t.toISOString()}","${e.miss.join(" ")}"`)];
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([rows.join("\n")], { type: "text/csv" })); a.download = "violations.csv"; a.click(); };
+$("snap").onclick = () => { if (!media) return; const c = document.createElement("canvas"); c.width = cap.width; c.height = cap.height;
+  const g = c.getContext("2d"); g.drawImage(cap, 0, 0); g.drawImage(ov, 0, 0); const a = document.createElement("a"); a.href = c.toDataURL("image/png"); a.download = "gatecheck-" + Date.now() + ".png"; a.click(); };
+let actx; function beep() { if (!cfg.sound) return; try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); const o = actx.createOscillator(), g = actx.createGain(); o.connect(g); g.connect(actx.destination); o.frequency.value = 880; g.gain.value = .08; o.start(); o.stop(actx.currentTime + .25); } catch (e) {} }
+drawLog(); label();
+</script>
+</body>
+</html>
